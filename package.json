@@ -1,0 +1,22 @@
+{
+  "name": "autocomplete-challenge",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node node_modules/http-server/bin/http-server -p 35472"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sean-roberts/autocomplete-challenge.git"
+  },
+  "author": "Sean Roberts",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sean-roberts/autocomplete-challenge/issues"
+  },
+  "homepage": "https://github.com/sean-roberts/autocomplete-challenge#readme",
+  "dependencies": {
+    "http-server": "^0.9.0"
+  }
+}
