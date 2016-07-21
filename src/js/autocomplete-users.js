@@ -38,6 +38,7 @@
             var input = document.createElement('input');
             input.setAttribute('disabled', 'true');
             input.setAttribute('type', 'button');
+            input.className = 'injected-autocomplete-user';
             input.value = suggestedUser.username;
 
             return input;
