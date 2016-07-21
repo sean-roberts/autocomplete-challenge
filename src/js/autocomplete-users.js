@@ -39,7 +39,9 @@
             input.setAttribute('disabled', 'true');
             input.setAttribute('type', 'button');
             input.className = 'injected-autocomplete-user';
-            input.value = suggestedUser.username;
+            // prefix @ symbol to let users know how to link
+            // in the future
+            input.value = '@' + suggestedUser.username;
 
             return input;
         },
