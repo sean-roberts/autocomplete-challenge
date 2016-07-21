@@ -45,7 +45,14 @@
 
         _dialog = (function(){
             var visible = false,
-                dialogContainer;
+                dialogContainer,
+                hideDialog = function(){
+                    if(dialogContainer){
+                        dialogContainer.parentNode.removeChild(dialogContainer);
+                        dialogContainer = null;
+                    }
+                    visible = false;
+                };
 
             return {
                 update: function(users){
@@ -55,11 +62,7 @@
 
                     // no users will hide the dialog
                     if(!users || users.length === 0){
-                        if(dialogContainer){
-                            dialogContainer.parentNode.removeChild(dialogContainer);
-                            dialogContainer = null;
-                        }
-                        visible = false;
+                        hideDialog();
                         return;
                     }
 
@@ -109,7 +112,7 @@
                     }
                 },
                 select: function(){
-
+                    hideDialog();
                 },
                 isVisible: function(){
                     return visible;
@@ -117,6 +120,8 @@
             };
         })(),
 
+        // suggestionUpdate takes the keycodes and the known
+        // lookup key and decides if we are in a
         _suggestionUpdate = (function(){
 
             var userMappings = [],
@@ -154,6 +159,8 @@
 
             return function(keycode, lookupKey){
 
+                var selectedSuggestion;
+
                 // handle going up and down the list selections
                 if(_isDialogDirectionKey(keycode)){
                     if(keycode === 38){
@@ -175,8 +182,14 @@
 
                 if(_isDialogSelectKey(keycode)){
                     _dialog.select();
-                    console.log('selecting user:', filteredMatches[currentSelectionIndex].name);
-                    return filteredMatches[currentSelectionIndex];
+
+                    selectedSuggestion = filteredMatches[currentSelectionIndex];
+
+                    // reset tracking variables
+                    filteredMatches = [];
+                    currentSelectionIndex = 0;
+
+                    return selectedSuggestion;
                 }
 
                 if(!lookupKey){
@@ -249,7 +262,7 @@
             if(!range){
                 return;
             }
-            
+
             var textNodeToUpdate;
 
             // the suggestion key will have all of the content including
@@ -271,7 +284,9 @@
 
                 // remove the matching key that we know about before adding the suggested block
                 textNodeToUpdate = newSuggestionBlock.previousSibling;
-                textNodeToUpdate.nodeValue = textNodeToUpdate.nodeValue.replace(suggestionKey, '');
+                if(textNodeToUpdate.nodeValue){
+                    textNodeToUpdate.nodeValue = textNodeToUpdate.nodeValue.replace(suggestionKey, '');
+                }
 
                 // put the cursor to the right of these nodes
                 range.selectNode(newSuggestionBlock.nextSibling);
@@ -310,6 +325,8 @@
                 }
 
                 if(_isDialogSelectKey(keycode)){
+                    // call process one final time to get the
+                    // key and submit it to get the suggestion block added
                     _processInputText(keycode);
                 }
 
