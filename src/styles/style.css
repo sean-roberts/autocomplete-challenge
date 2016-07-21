@@ -1,0 +1,38 @@
+
+/* global */
+*, *:before, *:after {
+    box-sizing: border-box;
+}
+body {
+    font-family: avenir, arial;
+}
+
+
+/* layout bits */
+.container {
+    padding-top: 5%;
+}
+
+
+/* faux input area */
+[contenteditable="true"] {
+
+    border: 1px solid #f1f1f1;
+    width: 100%;
+    max-width: 600px;
+    margin: 15px auto;
+    border-radius: 2px;
+    padding: 12px;
+    min-height: 100px;
+    color: #65657b;
+}
+
+[contenteditable="true"]:focus {
+    border: 1px solid #e8e3e3;
+    box-shadow: 0 1px 3px #e6e6e6;
+    outline: 0 none;
+}
+
+[autocomplete-dialog] li.js-selected {
+    font-weight: bold;
+}

@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node node_modules/http-server/bin/http-server -p 35472"
+    "test": "karma start --single-run",
+    "start": "node node_modules/http-server/bin/http-server src/ -p 35472"
   },
   "repository": {
     "type": "git",
