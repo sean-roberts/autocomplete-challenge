@@ -52,6 +52,12 @@
                         dialogContainer = null;
                     }
                     visible = false;
+                },
+                handleClickSuggestionSelection = function(event){
+                    _processInput(null, parseInt(this.getAttribute('user-id')));
+                    _dialog.select();
+                    event.preventDefault();
+                    return false;
                 };
 
             return {
@@ -73,6 +79,15 @@
                     users.forEach(function(user, index){
                         var li = document.createElement('li');
                         li.innerHTML = '<div>' + user.name  + '</div>';
+                        li.setAttribute('user-id', user.id);
+
+                        // event delegation would be better
+                        // but we are not expecting these lists to contain
+                        // large sets of users.
+                        // Note: use mouse down so we can suppress the
+                        // default behavior of moving the selection area
+                        li.onmousedown = handleClickSuggestionSelection;
+
 
                         // first item for a new list is selected by default
                         if(index === 0){
@@ -89,9 +104,12 @@
                         dialogContainer = document.createElement('div');
                         dialogContainer.setAttribute('autocomplete-dialog', 'true');
                         document.body.appendChild(dialogContainer);
+                    }else {
+                        // empty existing container
+                        dialogContainer.innerHTML = '';
                     }
 
-                    dialogContainer.innerHTML = listContainer.outerHTML;
+                    dialogContainer.appendChild(listContainer);
                 },
                 up: function(){
                     var current = dialogContainer.querySelector('li.js-selected'),
@@ -122,7 +140,7 @@
 
         // suggestionUpdate takes the keycodes and the known
         // lookup key and decides if we are in a
-        _suggestionUpdate = (function(){
+        _calculateSuggestionSelection = (function(){
 
             var userMappings = [],
                 filteredMatches = [],
@@ -157,9 +175,17 @@
             }, 0);
 
 
-            return function(keycode, lookupKey){
+            return function(keycode, lookupKey, userId){
 
                 var selectedSuggestion;
+
+                // if the calculation is already done for us.
+                // find the user in reference and return it
+                if(userId){
+                    return filteredMatches.filter(function(user){
+                        return user.id = userId;
+                    })[0];
+                }
 
                 // handle going up and down the list selections
                 if(_isDialogDirectionKey(keycode)){
@@ -191,6 +217,8 @@
 
                     return selectedSuggestion;
                 }
+
+
 
                 if(!lookupKey){
                     _dialog.update();
@@ -246,7 +274,7 @@
             return keyScope;
         },
 
-        _processInputText = function(currentKeycode){
+        _processInput = function(currentKeycode, explicitUserId){
 
             var selection = window.getSelection(),
                 range = selection.rangeCount > 0 && selection.getRangeAt(0),
@@ -274,7 +302,9 @@
 
             // console.log(fragmentContainer.innerHTML);
 
-            var selectedSuggestion = _suggestionUpdate(currentKeycode, lookupKey);
+
+            var selectedSuggestion = _calculateSuggestionSelection(currentKeycode, lookupKey, explicitUserId);
+
 
             if(selectedSuggestion){
 
@@ -321,13 +351,13 @@
                 // easier from keydown. If we know it will result in a
                 // dialog selection toggle we will prevent default
                 if(_isDialogDirectionKey(keycode)){
-                    _suggestionUpdate(keycode);
+                    _calculateSuggestionSelection(keycode);
                 }
 
                 if(_isDialogSelectKey(keycode)){
                     // call process one final time to get the
                     // key and submit it to get the suggestion block added
-                    _processInputText(keycode);
+                    _processInput(keycode);
                 }
 
                 event.preventDefault();
@@ -347,7 +377,7 @@
                 return;
             }
 
-            _processInputText(keycode);
+            _processInput(keycode);
         },
 
 
