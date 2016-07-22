@@ -3,8 +3,6 @@
 
     var _inputs = document.querySelectorAll('[autocomplete-users]'),
 
-        _suggestionKey,
-
         // given the root input's html string
         // we will pull out anything that we have already
         // formatted or generated ourselves.
@@ -26,6 +24,8 @@
             return tempDiv.innerHTML;
         },
 
+        // create the element that will be injected into
+        // the contenteditable container for highlighting.
         _createSuggestionInputNode = function(suggestedUser){
 
             // we have to user input[type=button][disabled]
@@ -49,6 +49,8 @@
             return input;
         },
 
+        // _dialog controls the interactions with the dialog piece of the UI
+        // Only use its methods for interaction changes
         _dialog = (function(){
             var visible = false,
                 dialogContainer,
@@ -67,6 +69,9 @@
                 };
 
             return {
+
+                // update the dialog list with the filtered users
+                // if we have no users, update will hide the dialog
                 update: function(users){
 
                     var listFragment,
@@ -127,7 +132,6 @@
                     //   - that it is assumed that there is a selection
                     //      existing as a caret.
                     //   - this is NOT a good responsive pattern. Clean this up
-                    // debugger;
 
                     if(range.getClientRects().length > 0){
                         dialogContainer.style.top = (range.getClientRects().item(0).bottom) + 'px';
@@ -139,6 +143,9 @@
 
                     dialogContainer.appendChild(listContainer);
                 },
+
+                // move the currently selected list item
+                // to be the sibling above the current selection
                 up: function(){
                     var current = dialogContainer.querySelector('li.js-selected'),
                         previous = current.previousSibling;
@@ -148,6 +155,9 @@
                         previous.classList.add('js-selected');
                     }
                 },
+
+                // move the currently selected list item
+                // to be the sibling below the current selection
                 down: function(){
                     var current = dialogContainer.querySelector('li.js-selected'),
                         next = current.nextSibling;
@@ -157,17 +167,25 @@
                         next.classList.add('js-selected');
                     }
                 },
+
+                // when we are making our selection, this is our
+                // hook to add any further calculations or ui updates
+                // like animations
                 select: function(){
                     hideDialog();
                 },
+
                 isVisible: function(){
                     return visible;
                 }
             };
         })(),
 
-        // suggestionUpdate takes the keycodes and the known
-        // lookup key and decides if we are in a
+        // _calculateSuggestionSelection takes in the pieces of
+        // current state like the keycode, the lookupKey string, or
+        // a userId that we explicitly want. Knowing that it calculates
+        // what to update with internal tracking values
+        // (filtered arrays) and UI state
         _calculateSuggestionSelection = (function(){
 
             var userMappings = [],
@@ -235,6 +253,8 @@
                     return;
                 }
 
+                // user hitting ENTER and wanting to select the currently
+                // highlighted item
                 if(_isDialogSelectKey(keycode)){
                     _dialog.select();
 
@@ -246,7 +266,6 @@
 
                     return selectedSuggestion;
                 }
-
 
 
                 if(!lookupKey){
@@ -288,6 +307,11 @@
             };
         })(),
 
+
+        // working in contenteditable fields, html is brought
+        // into the mix sometimes and we allow this function
+        // to filter it all out and give us the actual key
+        // the user is trying to submit on
         _getSuggestionKeyFromHtml = function(blob){
 
             var triggerIndex,
@@ -328,54 +352,60 @@
             return keyScope;
         },
 
+
+        // take the given interaction state and
+        // attempt to update our edit text with
+        // the generated suggestion block if we deem
+        // the user has selected a value that we have
+        // available.
         _processInput = function(currentKeycode, explicitUserId){
 
             var selection = window.getSelection(),
                 range = selection.rangeCount > 0 && selection.getRangeAt(0),
                 inputEl = document.activeElement,
                 precedingChar,
-                previousContents;
-
-            // are we in suggestion mode?
-            // update the suggestion widget with value
-            //      values to update on: word, arrow direction, enter selection
-            // when finished, update dom with new link
+                previousContents,
+                textNodeToUpdate,
+                suggestionKey,
+                lookupKey,
+                selectedSuggestion,
+                injectionSuggestionBlock;
 
             if(!range){
                 return;
             }
 
-            var textNodeToUpdate;
-
             // the suggestion key will have all of the content including
             // the '@' symbol if we have a good match
-            var suggestionKey = _getSuggestionKeyFromHtml(range.endContainer.nodeValue);
+            suggestionKey = _getSuggestionKeyFromHtml(range.endContainer.nodeValue);
 
             // if we have a suggestion
-            var lookupKey = (suggestionKey || '').substr(1);
+            // remove the @ symbol
+            lookupKey = (suggestionKey || '').substr(1);
 
-            // console.log(fragmentContainer.innerHTML);
-
-
-            var selectedSuggestion = _calculateSuggestionSelection(currentKeycode, lookupKey, explicitUserId);
-
+            // up until know we have only been doing mappings
+            // of what the user is typing and what is available.
+            // This calculation will return only if we have a
+            // match and the user is sumbitting an intent for selection
+            selectedSuggestion = _calculateSuggestionSelection(currentKeycode, lookupKey, explicitUserId);
 
             if(selectedSuggestion){
 
-                var newSuggestionBlock = _createSuggestionInputNode(selectedSuggestion);
+                injectionSuggestionBlock = _createSuggestionInputNode(selectedSuggestion);
 
-                range.insertNode(newSuggestionBlock);
+                range.insertNode(injectionSuggestionBlock);
 
-                // remove the matching key that we know about before adding the suggested block
-                textNodeToUpdate = newSuggestionBlock.previousSibling;
+                // remove the matching string that we know about before adding the suggested block
+                textNodeToUpdate = injectionSuggestionBlock.previousSibling;
                 if(textNodeToUpdate.nodeValue){
                     textNodeToUpdate.nodeValue = textNodeToUpdate.nodeValue.replace(suggestionKey, '');
                 }
 
                 // put the cursor to the right of these nodes
-                range.selectNode(newSuggestionBlock.nextSibling);
+                range.selectNode(injectionSuggestionBlock.nextSibling);
                 range.collapse(true);
 
+                // reset where we are
                 selection = window.getSelection();
                 selection.removeAllRanges();
                 selection.addRange(range);
@@ -460,8 +490,6 @@
         inputEl.addEventListener('keyup', _keyUpHandler);
         inputEl.addEventListener('paste', _pasteHandler);
     });
-
-
 
 
 })();
