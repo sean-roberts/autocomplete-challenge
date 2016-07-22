@@ -13,9 +13,12 @@
     <body>
 
         <div class="container">
-            <div contenteditable="true" autocomplete-users></div>
+            <div id="comment-box" contenteditable="true"></div>
         </div>
 
         <script src="/js/autocomplete-users.js"></script>
+        <script>
+            window.autocomplete.init(document.getElementById('comment-box'));
+        </script>
     </body>
 </html>

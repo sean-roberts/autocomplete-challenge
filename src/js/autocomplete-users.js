@@ -1,14 +1,12 @@
-;(function(){
+;(function(root){
     'use strict';
 
-    var _inputs = document.querySelectorAll('[autocomplete-users]'),
-
-        // given the root input's html string
-        // we will pull out anything that we have already
-        // formatted or generated ourselves.
-        // This is used to help prevent generated content
-        // from triggering suggestions themselves
-        _getRootTextContents = function(htmlBlob){
+    // given the root input's html string
+    // we will pull out anything that we have already
+    // formatted or generated ourselves.
+    // This is used to help prevent generated content
+    // from triggering suggestions themselves
+    var _getRootTextContents = function(htmlBlob){
             var nonTextNodes,
                 tempDiv = document.createElement('div');
 
@@ -483,13 +481,20 @@
         };
 
 
-    // Assign all of the appropriate event bindings
-    // to the matching input elements
-    Array.prototype.forEach.call(_inputs, function(inputEl){
+    window.autocomplete = Object.assign({}, window.autocomplete, {});
+
+    // Public function to bind inputs to have
+    // our users autosuggest functionality
+    window.autocomplete.init = function(inputEl){
+
+        if(!inputEl){
+            console.error('autocomplete#init requires a DOM node');
+            return;
+        }
+
         inputEl.addEventListener('keydown', _keyDownHandler);
         inputEl.addEventListener('keyup', _keyUpHandler);
         inputEl.addEventListener('paste', _pasteHandler);
-    });
+    };
 
-
-})();
+})(this);

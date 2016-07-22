@@ -7,11 +7,15 @@
 - navigate browser to `http://localhost:35472`
 
 ### Using the library:
-- add `autocomplete-users` attribute to the contenteditable element that resides as the
-comment box.
+- `window.autocomplete` is globally available when you add the library to a page. Using the
+`window.autocomplete.init( {ContentEditableNode} )` function will initiate the autocomplete bindings.
+- Users simply need to type `@` then the user they are trying to match.
 
 
 ### Decisions Made
+- We are using a contenteditable element as the base for our text editing. What it allowed that
+textarea or input[type=text] did not, was the ability to markup elements inside of itself. This
+allows us to style the elements and identify the user tags when we process the content on the backend.
 - Decided to use usernames as the primary selection method. It is assumed to be
 more unique than actual names and would keep the consistency of how users reference
 each other. Meaning, regardless of how you searched for your suggestion, you will see the
@@ -25,9 +29,6 @@ project. I use a very primitive check to drill down suggestions but I believe pr
 suggestions (Levenshtein distance calculation, mispellings, approximate matching, etc.)
 would be behind a backend service.
 - Responsiveness and mobile readiness did not make it into the work of this phase 1.
-- The library is initiated on load - as it assumes the html is ready and available. I think
-that is usually a bad practice. But, for the sake of this project, it's not a bad requirement.
-Easy to change to have an api to trigger this initialization.
 
 
 ### What I Left Out Of Scope
