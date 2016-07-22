@@ -19,3 +19,7 @@ each other.
 - Implementation of how we should render/store this data was not in scope, but I
 would push that we track the user in the comment by id. On render we pull out the
 up-to-date value for the username. Allowing links to not become stale.
+- The search suggestions sorting algorithm is not implemented in the scope of this
+project. I use a very primitive check to drill down suggestions but I believe proper
+suggestions (Levenshtein distance calculation, mispellings, approximate matching, etc.)
+would be behind a service backend.

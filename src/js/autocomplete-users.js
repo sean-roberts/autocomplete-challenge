@@ -38,7 +38,10 @@
             var input = document.createElement('input');
             input.setAttribute('disabled', 'true');
             input.setAttribute('type', 'button');
+            input.setAttribute('alt', suggestedUser.name);
+            input.setAttribute('title', suggestedUser.name);
             input.className = 'injected-autocomplete-user';
+
             // prefix @ symbol to let users know how to link
             // in the future
             input.value = '@' + suggestedUser.username;
@@ -67,7 +70,9 @@
                 update: function(users){
 
                     var listFragment,
-                        listContainer;
+                        listContainer,
+                        selection = window.getSelection(),
+                        range = selection.rangeCount > 0 && selection.getRangeAt(0);
 
                     // no users will hide the dialog
                     if(!users || users.length === 0){
@@ -80,8 +85,13 @@
                     listFragment = document.createDocumentFragment();
 
                     users.forEach(function(user, index){
-                        var li = document.createElement('li');
-                        li.innerHTML = '<div>' + user.name  + '</div>';
+                        var li = document.createElement('li'),
+                            content = '';
+
+                        content += '<img src="' + user.avatar_url + '"/>'
+                        content += '<div class="names"> @' + user.username  + '<div class="subname">' + user.name  + '</div></div>'
+                        li.innerHTML = content;
+
                         li.setAttribute('user-id', user.id);
 
                         // event delegation would be better
@@ -110,6 +120,21 @@
                     }else {
                         // empty existing container
                         dialogContainer.innerHTML = '';
+                    }
+
+                    // line up the dialog box based on where the current caret is
+                    // Note:
+                    //   - that it is assumed that there is a selection
+                    //      existing as a caret.
+                    //   - this is NOT a good responsive pattern. Clean this up
+                    // debugger;
+
+                    if(range.getClientRects().length > 0){
+                        dialogContainer.style.top = (range.getClientRects().item(0).bottom) + 'px';
+                        dialogContainer.style.left = (range.getClientRects().item(0).left - 100) + 'px';
+                    }else {
+                        dialogContainer.style.top = (range.getBoundingClientRect().bottom) + 'px';
+                        dialogContainer.style.left = (range.getBoundingClientRect().left - 100) + 'px';
                     }
 
                     dialogContainer.appendChild(listContainer);
@@ -147,7 +172,8 @@
 
             var userMappings = [],
                 filteredMatches = [],
-                currentSelectionIndex = 0;
+                currentSelectionIndex = 0,
+                MAX_RESULTS = 6;
 
             // when we load this is important
             // but for the purpose of this program
@@ -231,9 +257,34 @@
                 filteredMatches = userMappings.filter(function(user){
                     return ((user.name || '').toLowerCase().indexOf(lookupKey.toLowerCase()) > -1)
                             || ((user.username || '').toLowerCase().indexOf(lookupKey.toLowerCase()) > -1);
+                }).sort(function(a,b){
+
+                    // simple checks to try to put the words that
+                    // match earlier in the user name and username
+                    // higher in the array
+
+                    var key = lookupKey.toLowerCase(),
+                        aScore,
+                        aNameScore = a.name.indexOf(key),
+                        aUsernameScore = a.username.indexOf(key),
+                        bScore,
+                        bNameScore = b.name.indexOf(key),
+                        bUsernameScore = b.username.indexOf(key);
+
+                    // choose which score puts the match closer
+                    // to the start of the word
+                    aScore = aNameScore > aUsernameScore ? aNameScore : aUsernameScore;
+                    bScore = bNameScore > bUsernameScore ? bNameScore : bUsernameScore;
+
+                    if(aScore > bScore){
+                        return 1;
+                    } else if(aScore < bScore){
+                        return -1;
+                    }
+                    return 0;
                 });
 
-                _dialog.update(filteredMatches);
+                _dialog.update(filteredMatches.slice(0, MAX_RESULTS));
             };
         })(),
 

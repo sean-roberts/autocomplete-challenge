@@ -33,8 +33,63 @@ body {
     outline: 0 none;
 }
 
+[autocomplete-dialog] {
+    width: 200px;
+    border: 1px solid #e6e0ef;
+    position: absolute;
+    z-index: 9999;
+    background: #fff;
+    border-radius: 2px;
+    box-shadow: 0 1px 5px #efefef;
+}
+[autocomplete-dialog] ul,
+[autocomplete-dialog] li {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+[autocomplete-dialog] li {
+    border-bottom: 1px solid #f9f9f9;
+    clear:both;
+    cursor: pointer;
+}
+[autocomplete-dialog] li:after {
+	visibility: hidden;
+	display: block;
+	font-size: 0;
+	content: " ";
+	clear: both;
+	height: 0;
+}
+
 [autocomplete-dialog] li.js-selected {
-    font-weight: bold;
+    background: #f9f9f9;
+}
+
+[autocomplete-dialog]:hover li.js-selected {
+    background: transparent;
+}
+
+[autocomplete-dialog]:hover li:hover {
+    background: #f9f9f9;
+}
+
+[autocomplete-dialog] li img {
+    width: 30px;
+    border-radius: 15px;
+    overflow: hidden;
+    float: left;
+    margin: 10px;
+}
+
+[autocomplete-dialog] li .names {
+    padding: 10px 10px 5px 40px;
+}
+
+[autocomplete-dialog] li .subname {
+    font-size: 12px;
+    color: #a5a0a0;
 }
 
 
@@ -47,7 +102,7 @@ body {
     padding: 0 2px;
     margin: 0;
     background: #f3f3f3;
-    color: inherit;;
+    color: inherit;
 }
 
 
