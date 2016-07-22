@@ -14,7 +14,8 @@ comment box.
 ### Decisions Made
 - Decided to use usernames as the primary selection method. It is assumed to be
 more unique than actual names and would keep the consistency of how users reference
-each other.
+each other. Meaning, regardless of how you searched for your suggestion, you will see the
+username filled into the content when selected.
 - Implementation of how we should render/store this data was not in scope, but I
 would push that we track the user in the comment by id. On render we pull out the
 up-to-date value for the username. Allowing links to not become stale. Note, I updated
